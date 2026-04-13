@@ -93,8 +93,8 @@ export async function POST(req: Request) {
     // Note: For a true prototype we instantiate the chat session fresh.
     const existingHistory = chatMemoryHistory.get(sender) || [];
     const chat = ai.chats.create({
-      model: "gemini-2.0-flash",
-      // model: "gemma-3-27b-it",
+      // model: "gemini-2.0-flash",
+      model: "gemma-4-31b-it",
       history: existingHistory,
       config: {
         systemInstruction: SYS_PROMPT,
