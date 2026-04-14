@@ -49,7 +49,7 @@ export const listCategoryItems = async (categoryName: string) => {
   // 2. Find all products that belong to this category's label
   return await Product.find({
     shop_id: SHOP_ID,
-    category: cat.label
+    category: cat._id
   });
 };
 
