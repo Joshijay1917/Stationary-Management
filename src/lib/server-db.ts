@@ -67,7 +67,7 @@ export const getTodaySales = async () => {
   });
 
   // 3. Crunch the numbers using standard JavaScript!
-  const revenue = todaysTxns.reduce((sum, txn) => sum + txn.totalAmount, 0);
+  const revenue = todaysTxns.reduce((sum, txn) => sum + txn.total_amount, 0);
   const count = todaysTxns.length;
 
   return { revenue, count };
