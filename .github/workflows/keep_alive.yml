@@ -2,8 +2,8 @@ name: Keep Render Backend Awake
 
 on:
   schedule:
-    # Runs every 10 minutes (Render sleeps after 15 mins of inactivity)
-    - cron: '*/1 * * * *'
+    # Runs every 7 minutes (Render sleeps after 15 mins of inactivity)
+    - cron: '*/7 * * * *'
   workflow_dispatch: # Allows you to run it manually for testing
 
 jobs:
@@ -12,5 +12,5 @@ jobs:
     steps:
       - name: Ping Render Backend
         run: |
-          curl -s https://my-waha-api-wv3j.onrender.com/health > /dev/null
+          curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" https://my-waha-api-wv3j.onrender.com/health
           echo "Ping sent at $(date)"
