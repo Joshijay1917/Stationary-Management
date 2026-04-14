@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Transaction } from "@/store/sales-store";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +13,7 @@ import { toast } from "sonner";
 import { useReactToPrint } from "react-to-print";
 import jsPDF from "jspdf";
 import { toPng } from "html-to-image";
+import { Transaction } from "@/models/Transactions";
 
 interface InvoiceDialogProps {
   transaction: Transaction | null;
@@ -28,7 +28,7 @@ export function InvoiceDialog({ transaction, open, onOpenChange }: InvoiceDialog
   // Print Logic
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `Invoice_${transaction?.invoiceNumber || "000"}`,
+    documentTitle: `Invoice_${transaction?.invoice_number || "000"}`,
   });
 
   // PDF Download Logic
@@ -43,27 +43,27 @@ export function InvoiceDialog({ transaction, open, onOpenChange }: InvoiceDialog
         backgroundColor: "#ffffff",
         cacheBust: true,
       });
-      
+
       // 2. Calculate proportions
       const tempPdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = tempPdf.internal.pageSize.getWidth(); // 210mm
       const imgProps = tempPdf.getImageProperties(imgData);
-      
+
       // 3. Add 10mm margins for a professional look
       const margin = 10;
       const printWidth = pdfWidth - margin * 2;
       const printHeight = (imgProps.height * printWidth) / imgProps.width;
-      
+
       // 4. Create standard PDF but with dynamic height so nothing is ever cut off!
       const finalPdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [pdfWidth, Math.max(297, printHeight + margin * 2)] 
+        format: [pdfWidth, Math.max(297, printHeight + margin * 2)]
         // 297mm is standard A4 height. If receipt is longer, it expands dynamically.
       });
-      
+
       finalPdf.addImage(imgData, "PNG", margin, margin, printWidth, printHeight);
-      finalPdf.save(`Invoice_${transaction.invoiceNumber}.pdf`);
+      finalPdf.save(`Invoice_${transaction.invoice_number}.pdf`);
 
       toast.success("PDF Downloaded successfully");
     } catch (error) {
@@ -76,7 +76,7 @@ export function InvoiceDialog({ transaction, open, onOpenChange }: InvoiceDialog
 
   const copyToClipboard = () => {
     if (transaction) {
-      const details = `Invoice: ${transaction.invoiceNumber}\nTotal: ₹${transaction.totalAmount}\nItems: ${transaction.items.length}`;
+      const details = `Invoice: ${transaction.invoice_number}\nTotal: ₹${transaction.total_amount}\nItems: ${transaction.items.length}`;
       navigator.clipboard.writeText(details);
       toast.success("Invoice details copied to clipboard");
     }
@@ -104,8 +104,8 @@ export function InvoiceDialog({ transaction, open, onOpenChange }: InvoiceDialog
 
         {/* The Printable Area */}
         <div className="p-1 max-h-[60vh] overflow-y-auto print:max-h-none print:overflow-visible">
-          <div 
-            ref={printRef} 
+          <div
+            ref={printRef}
             className="p-6 rounded-sm shadow-sm print:shadow-none print:p-0"
             style={{ backgroundColor: "#ffffff", color: "#000000", fontFamily: "sans-serif", width: "100%" }}
           >
@@ -117,7 +117,7 @@ export function InvoiceDialog({ transaction, open, onOpenChange }: InvoiceDialog
                 table { page-break-inside: auto; }
               `}
             </style>
-            
+
             {/* Header */}
             <div className="text-center pb-4" style={{ borderBottom: "1px solid #e5e7eb" }}>
               <h2 className="text-xl font-bold uppercase">QuickBill POS</h2>
@@ -129,15 +129,15 @@ export function InvoiceDialog({ transaction, open, onOpenChange }: InvoiceDialog
             <div className="flex justify-between py-4 text-sm" style={{ borderBottom: "1px solid #e5e7eb" }}>
               <div>
                 <p className="text-xs" style={{ color: "#6b7280" }}>Invoice No:</p>
-                <p className="font-semibold">{transaction.invoiceNumber}</p>
+                <p className="font-semibold">{transaction.invoice_number}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs" style={{ color: "#6b7280" }}>Date:</p>
                 <p className="font-semibold">
-                  {new Date(transaction.timestamp).toLocaleDateString()}
+                  {new Date(transaction.createdAt).toLocaleDateString()}
                 </p>
                 <p className="text-xs" style={{ color: "#6b7280" }}>
-                  {new Date(transaction.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(transaction.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             </div>
@@ -156,11 +156,11 @@ export function InvoiceDialog({ transaction, open, onOpenChange }: InvoiceDialog
                 <tbody>
                   {transaction.items.map((item, idx) => (
                     <tr key={idx} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                      <td className="py-2" style={{ color: "#1f2937" }}>{item.product.shortName}</td>
+                      <td className="py-2" style={{ color: "#1f2937" }}>{item.name}</td>
                       <td className="py-2 text-center" style={{ color: "#1f2937" }}>{item.quantity}</td>
-                      <td className="py-2 text-right" style={{ color: "#1f2937" }}>₹{item.product.price}</td>
+                      <td className="py-2 text-right" style={{ color: "#1f2937" }}>₹{item.price}</td>
                       <td className="py-2 text-right font-medium whitespace-nowrap" style={{ color: "#1f2937" }}>
-                        ₹{item.product.price * item.quantity}
+                        ₹{item.price * item.quantity}
                       </td>
                     </tr>
                   ))}
@@ -173,15 +173,15 @@ export function InvoiceDialog({ transaction, open, onOpenChange }: InvoiceDialog
               <div className="w-48 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span style={{ color: "#6b7280" }}>Subtotal</span>
-                  <span style={{ color: "#000000" }}>₹{transaction.totalAmount}</span>
+                  <span style={{ color: "#000000" }}>₹{transaction.total_amount}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold">
                   <span style={{ color: "#000000" }}>Total</span>
-                  <span style={{ color: "#000000" }}>₹{transaction.totalAmount}</span>
+                  <span style={{ color: "#000000" }}>₹{transaction.total_amount}</span>
                 </div>
               </div>
             </div>
-            
+
             <div className="text-center pt-8 text-xs" style={{ color: "#9ca3af" }}>
               <p>Thank you for shopping with us!</p>
               <p>Generated by QuickBill POS</p>

@@ -10,7 +10,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Product } from "@/data/products";
+import { Product } from "@/models/Product";
 import { useCartStore } from "@/store/cart-store";
 import { useCategoryStore } from "@/store/category-store";
 import { useInventoryStore } from "@/store/inventory-store";
@@ -18,19 +18,19 @@ import { toast } from "sonner";
 
 type FilterCategory = "all" | string;
 
-
-
 export function ProductGrid() {
   const [activeFilter, setActiveFilter] = useState<FilterCategory>("all");
   const addItem = useCartStore((s) => s.addItem);
-  
+
   const { categories } = useCategoryStore();
   const { products } = useInventoryStore();
 
   const filterTabs = [
     { key: "all", label: "All" },
-    ...categories.map((c) => ({ key: c.id, label: c.label }))
+    ...categories.map((c) => ({ key: c._id, label: c.label }))
   ];
+
+  console.log("FilteredTabs:", filterTabs)
 
   const filteredProducts =
     activeFilter === "all"
@@ -39,7 +39,7 @@ export function ProductGrid() {
 
   const handleAddItem = (product: (typeof products)[0]) => {
     addItem(product);
-    toast(`Added ${product.shortName}`, {
+    toast(`Added ${product.name}`, {
       description: `₹${product.price}`,
       duration: 1000,
       position: "top-center",
@@ -76,7 +76,7 @@ export function ProductGrid() {
       <div className="flex-1 min-h-0 overflow-y-auto px-3 py-3">
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 pb-2">
           {filteredProducts.map((product) => {
-            const config = categories.find((c) => c.id === product.category) || {
+            const config = categories.find((c) => c._id === product.category) || {
               label: "Unknown",
               color: "bg-gray-500",
               gradient: "from-gray-500 to-gray-600"
@@ -84,8 +84,8 @@ export function ProductGrid() {
 
             return (
               <button
-                id={`product-${product.id}`}
-                key={product.id}
+                id={`product-${product._id}`}
+                key={product._id}
                 className={`
                   relative flex flex-col items-center justify-center
                   rounded-xl p-2.5 min-h-[88px]
@@ -102,7 +102,7 @@ export function ProductGrid() {
               >
                 <Package className="h-5 w-5 mb-1 opacity-80" />
                 <span className="text-[11px] sm:text-xs font-semibold text-center leading-tight line-clamp-2">
-                  {product.shortName}
+                  {product.name}
                 </span>
                 <span className="text-[10px] sm:text-[11px] font-bold mt-1 opacity-90 bg-black/20 rounded-full px-2 py-0.5">
                   ₹{product.price}

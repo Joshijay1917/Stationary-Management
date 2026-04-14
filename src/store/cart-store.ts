@@ -1,10 +1,6 @@
 import { create } from "zustand";
-import { Product } from "@/data/products";
-
-export type CartItem = {
-  product: Product;
-  quantity: number;
-};
+import { CartItem } from "@/models/Transactions";
+import { Product } from "@/models/Product";
 
 type CartState = {
   items: CartItem[];
@@ -23,29 +19,29 @@ export const useCartStore = create<CartState>((set, get) => ({
   addItem: (product) =>
     set((state) => {
       const existing = state.items.find(
-        (item) => item.product.id === product.id
+        (item) => item.product_id === product._id
       );
       if (existing) {
         return {
           items: state.items.map((item) =>
-            item.product.id === product.id
+            item.product_id === product._id
               ? { ...item, quantity: item.quantity + 1 }
               : item
           ),
         };
       }
-      return { items: [...state.items, { product, quantity: 1 }] };
+      return { items: [...state.items, { product_id: product._id, name: product.name, cost_price: product.cost_price, price: product.price, quantity: 1 }] };
     }),
 
   removeItem: (productId) =>
     set((state) => ({
-      items: state.items.filter((item) => item.product.id !== productId),
+      items: state.items.filter((item) => item.product_id !== productId),
     })),
 
   incrementQty: (productId) =>
     set((state) => ({
       items: state.items.map((item) =>
-        item.product.id === productId
+        item.product_id === productId
           ? { ...item, quantity: item.quantity + 1 }
           : item
       ),
@@ -53,15 +49,15 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   decrementQty: (productId) =>
     set((state) => {
-      const item = state.items.find((i) => i.product.id === productId);
+      const item = state.items.find((i) => i.product_id === productId);
       if (item && item.quantity <= 1) {
         return {
-          items: state.items.filter((i) => i.product.id !== productId),
+          items: state.items.filter((i) => i.product_id !== productId),
         };
       }
       return {
         items: state.items.map((i) =>
-          i.product.id === productId
+          i.product_id === productId
             ? { ...i, quantity: i.quantity - 1 }
             : i
         ),
@@ -75,7 +71,7 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   getTotalPrice: () =>
     get().items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+      (sum, item) => sum + item.price * item.quantity,
       0
     ),
 }));

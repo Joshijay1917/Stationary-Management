@@ -18,11 +18,11 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Product } from "@/data/products";
 import { useCategoryStore } from "@/store/category-store";
 import { Barcode, CheckCircle2 } from "lucide-react";
 import { useInventoryStore } from "@/store/inventory-store";
 import { toast } from "sonner";
+import { Product } from "@/models/Product";
 
 interface ItemDialogProps {
   open: boolean;
@@ -48,15 +48,15 @@ export function ItemDialog({ open, onOpenChange, defaultValues }: ItemDialogProp
     if (open) {
       if (defaultValues) {
         setName(defaultValues.name);
-        setShortName(defaultValues.shortName);
+        setShortName(defaultValues.name);
         setCategory(defaultValues.category);
         setPrice(String(defaultValues.price));
-        setCostPrice(String(defaultValues.costPrice || ""));
+        setCostPrice(String(defaultValues.cost_price || ""));
         setStock(String(defaultValues.stock));
       } else {
         setName("");
         setShortName("");
-        setCategory(categories.length > 0 ? categories[0].id : "");
+        setCategory(categories.length > 0 ? categories[0]._id : "");
         setPrice("");
         setCostPrice("");
         setStock("");
@@ -71,21 +71,20 @@ export function ItemDialog({ open, onOpenChange, defaultValues }: ItemDialogProp
       return;
     }
 
-    const payload: Product = {
-      id: isEditing ? defaultValues!.id : `item-${Date.now()}`,
-      name,
-      shortName,
+    const payload: Partial<Product> = {
+      _id: isEditing ? defaultValues!._id : `item-${Date.now()}`,
+      short_name: shortName,
       category,
       price: Number(price),
-      costPrice: Number(costPrice),
+      cost_price: Number(costPrice),
       stock: Number(stock),
     };
 
     if (isEditing) {
-      updateItem(payload.id, payload);
+      updateItem(payload._id!, payload);
       toast.success("Item updated successfully");
     } else {
-      addItem(payload);
+      addItem(payload as Product);
       toast.success("New item added to inventory");
     }
 
@@ -142,7 +141,7 @@ export function ItemDialog({ open, onOpenChange, defaultValues }: ItemDialogProp
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
+                  <SelectItem key={cat._id} value={cat._id}>
                     {cat.label}
                   </SelectItem>
                 ))}

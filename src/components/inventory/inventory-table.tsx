@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Product } from "@/data/products";
 import { useCategoryStore } from "@/store/category-store";
 import { StockIndicator } from "./stock-indicator";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,7 @@ import {
 import { useInventoryStore } from "@/store/inventory-store";
 import { ItemDialog } from "./item-dialog";
 import { toast } from "sonner";
+import { Product } from "@/models/Product";
 
 interface InventoryTableProps {
   products: Product[];
@@ -66,14 +66,14 @@ export function InventoryTable({ products }: InventoryTableProps) {
               </TableRow>
             ) : (
               products.map((product) => {
-                const config = categories.find((c) => c.id === product.category) || {
+                const config = categories.find((c) => c._id === product.category) || {
                   label: "Unknown",
                   color: "bg-gray-500",
                   gradient: "from-gray-500 to-gray-600",
                 };
 
                 return (
-                  <TableRow key={product.id} className="group transition-colors relative">
+                  <TableRow key={product._id} className="group transition-colors relative">
                     {/* Name column */}
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export function InventoryTable({ products }: InventoryTableProps) {
                               variant="ghost"
                               size="icon"
                               className="h-7 w-7 rounded-none rounded-l-md border-r hover:bg-muted focus-visible:ring-0 focus-visible:bg-muted"
-                              onClick={() => updateStock(product.id, -1)}
+                              onClick={() => updateStock(product._id, -1)}
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
@@ -128,7 +128,7 @@ export function InventoryTable({ products }: InventoryTableProps) {
                               variant="ghost"
                               size="icon"
                               className="h-7 w-7 rounded-none rounded-r-md hover:bg-muted focus-visible:ring-0 focus-visible:bg-muted"
-                              onClick={() => updateStock(product.id, 1)}
+                              onClick={() => updateStock(product._id, 1)}
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
@@ -151,7 +151,7 @@ export function InventoryTable({ products }: InventoryTableProps) {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
-                            onClick={() => handleDelete(product.id, product.name)}
+                            onClick={() => handleDelete(product._id, product.name)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete

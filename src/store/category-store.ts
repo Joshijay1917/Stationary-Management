@@ -1,49 +1,87 @@
 import { create } from "zustand";
-import { Category, initialCategories } from "@/data/categories";
+import { initialCategories } from "@/data/categories";
+import { Category } from "@/models/Category";
+import { ObjectId } from "mongoose";
+import { withOptimisticSync } from "@/lib/optimisticSync";
 
 type CategoryState = {
   categories: Category[];
-  addCategory: (category: Category) => void;
+  isLoading: boolean;
+  fetchCategories: () => Promise<Category[]>;
+  addCategory: (category: Partial<Category>) => void;
   updateCategory: (id: string, data: Partial<Category>) => void;
   deleteCategory: (id: string) => void;
 };
 
-// Sync Background Helper
-const syncCategories = async (categories: Category[]) => {
-  try {
-    await fetch("/api/sync", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ categories }),
-    });
-  } catch (error) {
-    console.error("Failed to sync categories:", error);
+export const useCategoryStore = create<CategoryState>((set, get) => ({
+  categories: [],
+  isLoading: false,
+
+  // Sync Background Helper
+  fetchCategories: async (): Promise<Category[]> => {
+    try {
+      const categories = await fetch("/api/categories");
+      const data = await categories.json();
+      set({ categories: data, isLoading: false });
+      return data;
+    } catch (error) {
+      console.error("Failed to sync categories:", error);
+      return [];
+    }
+  },
+
+  addCategory: async (categoryData) => {
+    const tempId = Date.now().toString();
+    const previous = get().categories;
+
+    // 1. Instant UI Update
+    set({ categories: [...previous, { ...categoryData, _id: tempId } as Category] });
+
+    // 2. Background Sync
+    await withOptimisticSync(
+      fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(categoryData),
+      }),
+      () => set({ categories: previous }), // Rollback if it fails
+      (realCategory) => set((state) => ({   // Replace temp ID if it succeeds
+        categories: state.categories.map((c) => (c._id === tempId ? realCategory : c)),
+      }))
+    );
+  },
+
+  updateCategory: async (id, data) => {
+    const previous = get().categories;
+
+    // 1. Instant UI Update
+    set((state) => ({
+      categories: state.categories.map((c) => (c._id === id ? { ...c, ...data } : c)),
+    }));
+
+    // 2. Background Sync
+    await withOptimisticSync(
+      fetch(`/api/categories?id=${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }),
+      () => set({ categories: previous }) // Only need a rollback here!
+    );
+  },
+
+  deleteCategory: async (id) => {
+    const previous = get().categories;
+
+    // 1. Instant UI Update
+    set((state) => ({
+      categories: state.categories.filter((c) => c._id !== id),
+    }));
+
+    // 2. Background Sync
+    await withOptimisticSync(
+      fetch(`/api/categories?id=${id}`, { method: "DELETE" }),
+      () => set({ categories: previous }) // Only need a rollback here!
+    );
   }
-};
-
-export const useCategoryStore = create<CategoryState>((set) => ({
-  categories: initialCategories,
-
-  addCategory: (category) =>
-    set((state) => {
-      const newCategories = [...state.categories, category];
-      syncCategories(newCategories);
-      return { categories: newCategories };
-    }),
-
-  updateCategory: (id, data) =>
-    set((state) => {
-      const newCategories = state.categories.map((c) =>
-        c.id === id ? { ...c, ...data } : c
-      );
-      syncCategories(newCategories);
-      return { categories: newCategories };
-    }),
-
-  deleteCategory: (id) =>
-    set((state) => {
-      const newCategories = state.categories.filter((c) => c.id !== id);
-      syncCategories(newCategories);
-      return { categories: newCategories };
-    }),
 }));

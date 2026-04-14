@@ -11,10 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCategoryStore } from "@/store/category-store";
-import { AVAILABLE_COLORS, Category } from "@/data/categories";
+import { AVAILABLE_COLORS } from "@/data/categories";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useInventoryStore } from "@/store/inventory-store";
+import { Category } from "@/models/Category";
 
 interface CategoryManagerProps {
   open: boolean;
@@ -38,7 +39,7 @@ export function CategoryManager({ open, onOpenChange }: CategoryManagerProps) {
   };
 
   const handleEdit = (cat: Category) => {
-    setEditingId(cat.id);
+    setEditingId(cat._id);
     setNewLabel(cat.label);
     setNewColor(cat.color);
     setNewGradient(cat.gradient);
@@ -70,7 +71,6 @@ export function CategoryManager({ open, onOpenChange }: CategoryManagerProps) {
       toast.success("Category updated");
     } else {
       addCategory({
-        id: `cat-${Date.now()}`,
         label: newLabel,
         color: newColor || "bg-gray-500",
         gradient: newGradient || "from-gray-500 to-gray-600",
@@ -90,7 +90,7 @@ export function CategoryManager({ open, onOpenChange }: CategoryManagerProps) {
         <div className="flex flex-col gap-4 py-4">
           <div className="space-y-4">
             {categories.map((cat) => (
-              <div key={cat.id} className="flex items-center justify-between p-2 border rounded-md bg-muted/30">
+              <div key={cat._id} className="flex items-center justify-between p-2 border rounded-md bg-muted/30">
                 <div className="flex items-center gap-2">
                   <div className={`w-3 h-3 rounded-full ${cat.color}`} />
                   <span className="font-medium text-sm">{cat.label}</span>
@@ -103,7 +103,7 @@ export function CategoryManager({ open, onOpenChange }: CategoryManagerProps) {
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => handleDelete(cat.id, cat.label)}
+                    onClick={() => handleDelete(cat._id, cat.label)}
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>

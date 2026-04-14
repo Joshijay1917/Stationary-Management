@@ -116,15 +116,15 @@ export async function POST(req: Request) {
 
         if (call.name === "check_stock") {
           const args = call.args as { item_name: string };
-          result = checkStock(args.item_name);
+          result = await checkStock(args.item_name);
         } else if (call.name === "get_low_stock") {
           const args = call.args as { threshold: number };
-          result = getLowStock(args.threshold || 10);
+          result = await getLowStock(args.threshold || 10);
         } else if (call.name === "list_category") {
           const args = call.args as { category_name: string };
-          result = listCategoryItems(args.category_name);
+          result = await listCategoryItems(args.category_name);
         } else if (call.name === "get_today_revenue") {
-          result = getTodaySales();
+          result = await getTodaySales();
         }
 
         // Send tool response back to Gemini to compute final answer
@@ -148,7 +148,7 @@ export async function POST(req: Request) {
     } catch {
       replyText = rawText;
     }
-    
+
     const updatedHistory = await chat.getHistory();
     chatMemoryHistory.set(sender, updatedHistory);
     // Emit the reply fully back to WAHA to send the real WhatsApp chat!

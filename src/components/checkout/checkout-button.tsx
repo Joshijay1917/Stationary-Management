@@ -3,9 +3,9 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cart-store";
-import { useSalesStore } from "@/store/sales-store";
 import { useInventoryStore } from "@/store/inventory-store";
 import { toast } from "sonner";
+import { useTransactionStore } from "@/store/sales-store";
 
 interface CheckoutButtonProps {
   totalPrice: number;
@@ -13,7 +13,7 @@ interface CheckoutButtonProps {
 
 export function CheckoutButton({ totalPrice }: CheckoutButtonProps) {
   const { clearCart, getTotalItems, items } = useCartStore();
-  const { addTransaction } = useSalesStore();
+  const { addTransaction } = useTransactionStore();
   const { updateStock } = useInventoryStore();
   const totalItems = getTotalItems();
 
@@ -25,26 +25,24 @@ export function CheckoutButton({ totalPrice }: CheckoutButtonProps) {
 
     // Calculate total profit margin
     const totalProfit = items.reduce((acc, item) => {
-      const margin = (item.product.price - item.product.costPrice) * item.quantity;
+      const margin = (item.price - item.cost_price) * item.quantity;
       return acc + margin;
     }, 0);
 
     // 1. Log transaction
     const now = Date.now();
     const invoiceNumber = `INV-${now.toString().slice(-6)}`;
-    
+
     addTransaction({
-      id: `txn-${now}`,
-      invoiceNumber,
-      timestamp: new Date().toISOString(),
+      invoice_number: invoiceNumber,
       items: [...items],
-      totalAmount: price,
-      totalProfit,
+      total_amount: price,
+      total_profit: totalProfit,
     });
 
     // 2. Deduct all bought items from the real inventory
     items.forEach((item) => {
-      updateStock(item.product.id, -item.quantity);
+      updateStock(item.product_id, -item.quantity);
     });
 
     // 3. Reset Cart

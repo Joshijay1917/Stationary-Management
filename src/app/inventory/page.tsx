@@ -24,7 +24,7 @@ export default function InventoryPage() {
 
   const filterTabs = [
     { id: "all", label: "All Items" },
-    ...categories.map(c => ({ id: c.id, label: c.label }))
+    ...categories.map(c => ({ id: c._id, label: c.label }))
   ];
 
   // Derive filtered products
@@ -32,7 +32,7 @@ export default function InventoryPage() {
     // 1. Text match (Case-insensitive fuzzy match)
     const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.shortName.toLowerCase().includes(searchQuery.toLowerCase());
+      product.name.toLowerCase().includes(searchQuery.toLowerCase());
 
     // 2. Category match
     const matchesCategory =

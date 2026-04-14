@@ -50,7 +50,7 @@ export function CartPanel() {
         ) : (
           <div className="divide-y divide-border">
             {items.map((item) => (
-              <CartItemRow key={item.product.id} item={item} />
+              <CartItemRow key={item.product_id} item={item} />
             ))}
           </div>
         )}

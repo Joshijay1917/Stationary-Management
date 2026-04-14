@@ -1,36 +1,47 @@
-export type Category = {
-    id: string;
-    label: string;
-    color: string;
-    gradient: string;
-};
+import { Category } from "@/models/Category";
+
+const now = new Date().toISOString();
 
 export const initialCategories: Category[] = [
     {
-        id: "notebooks",
+        _id: "notebooks",
+        shop_id: "shop_001",
         label: "Notebooks",
         color: "bg-indigo-500",
         gradient: "from-indigo-500 to-blue-600",
+        createdAt: now,
+        updatedAt: now,
     },
     {
-        id: "pens",
+        _id: "pens",
+        shop_id: "shop_001",
         label: "Pens",
         color: "bg-emerald-500",
         gradient: "from-emerald-500 to-teal-600",
+        createdAt: now,
+        updatedAt: now,
     },
     {
-        id: "printouts",
+        _id: "printouts",
+        shop_id: "shop_001",
         label: "Printouts",
         color: "bg-amber-500",
         gradient: "from-amber-500 to-orange-600",
+        createdAt: now,
+        updatedAt: now,
     },
     {
-        id: "accessories",
+        _id: "accessories",
+        shop_id: "shop_001",
         label: "Accessories",
         color: "bg-violet-500",
         gradient: "from-violet-500 to-purple-600",
+        createdAt: now,
+        updatedAt: now,
     },
 ];
+
+
 
 export const AVAILABLE_COLORS = [
     { color: "bg-indigo-500", gradient: "from-indigo-500 to-blue-600" },

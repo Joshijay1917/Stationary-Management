@@ -2,8 +2,9 @@
 
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCartStore, CartItem } from "@/store/cart-store";
 import { useCategoryStore } from "@/store/category-store";
+import { CartItem } from "@/models/Transactions";
+import { useCartStore } from "@/store/cart-store";
 
 interface CartItemRowProps {
   item: CartItem;
@@ -12,10 +13,10 @@ interface CartItemRowProps {
 export function CartItemRow({ item }: CartItemRowProps) {
   const { incrementQty, decrementQty, removeItem } = useCartStore();
   const { categories } = useCategoryStore();
-  const categoryConfig = categories.find(c => c.id === item.product.category) || {
+  const categoryConfig = categories.find(c => c._id === item.product_id) || {
     gradient: "from-gray-500 to-gray-600"
   };
-  const lineTotal = item.product.price * item.quantity;
+  const lineTotal = item.price * item.quantity;
 
   return (
     <div className="flex items-center gap-3 py-3 px-1 group animate-in fade-in slide-in-from-top-2 duration-200">
@@ -26,20 +27,20 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
       {/* Product info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{item.product.name}</p>
+        <p className="text-sm font-medium truncate">{item.name}</p>
         <p className="text-xs text-muted-foreground">
-          ₹{item.product.price} each
+          ₹{item.price} each
         </p>
       </div>
 
       {/* Quantity controls */}
       <div className="flex items-center gap-1 shrink-0">
         <Button
-          id={`qty-dec-${item.product.id}`}
+          id={`qty-dec-${item.product_id}`}
           variant="outline"
           size="icon"
           className="h-7 w-7 rounded-full"
-          onClick={() => decrementQty(item.product.id)}
+          onClick={() => decrementQty(item.product_id)}
         >
           <Minus className="h-3 w-3" />
         </Button>
@@ -47,11 +48,11 @@ export function CartItemRow({ item }: CartItemRowProps) {
           {item.quantity}
         </span>
         <Button
-          id={`qty-inc-${item.product.id}`}
+          id={`qty-inc-${item.product_id}`}
           variant="outline"
           size="icon"
           className="h-7 w-7 rounded-full"
-          onClick={() => incrementQty(item.product.id)}
+          onClick={() => incrementQty(item.product_id)}
         >
           <Plus className="h-3 w-3" />
         </Button>
@@ -64,11 +65,11 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
       {/* Remove button */}
       <Button
-        id={`remove-${item.product.id}`}
+        id={`remove-${item.product_id}`}
         variant="ghost"
         size="icon"
         className="h-7 w-7 rounded-full text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity shrink-0 max-sm:opacity-100"
-        onClick={() => removeItem(item.product.id)}
+        onClick={() => removeItem(item.product_id)}
       >
         <Trash2 className="h-3.5 w-3.5" />
       </Button>

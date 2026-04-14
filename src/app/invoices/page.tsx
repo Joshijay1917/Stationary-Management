@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { NavigationHeader } from "@/components/navigation-header";
-import { useSalesStore, Transaction } from "@/store/sales-store";
 import { Search, Eye, Download, FileText, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,9 +15,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTransactionStore } from "@/store/sales-store";
+import { Transaction } from "@/models/Transactions";
 
 export default function InvoicesPage() {
-  const { transactions } = useSalesStore();
+  const { transactions } = useTransactionStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTxn, setSelectedTxn] = useState<Transaction | null>(null);
@@ -27,13 +28,13 @@ export default function InvoicesPage() {
   // Derive filtered invoices
   const filteredInvoices = transactions.filter((txn) => {
     if (!searchQuery) return true;
-    
+
     const query = searchQuery.toLowerCase();
-    const dateStr = new Date(txn.timestamp).toLocaleDateString().toLowerCase();
-    
+    const dateStr = new Date(txn.createdAt).toLocaleDateString().toLowerCase();
+
     return (
-      txn.invoiceNumber.toLowerCase().includes(query) ||
-      txn.id.toLowerCase().includes(query) ||
+      txn.invoice_number.toLowerCase().includes(query) ||
+      txn._id.toLowerCase().includes(query) ||
       dateStr.includes(query)
     );
   });
@@ -55,7 +56,7 @@ export default function InvoicesPage() {
               Browse, reprint, or download past checkout receipts.
             </p>
           </div>
-          
+
           <div className="flex gap-2 w-full sm:w-auto">
             <div className="relative flex-1 sm:w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -96,27 +97,27 @@ export default function InvoicesPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredInvoices.map((txn) => (
-                      <TableRow key={txn.id} className="hover:bg-muted/30 group">
+                    {filteredInvoices.map((txn: Transaction) => (
+                      <TableRow key={txn._id} className="hover:bg-muted/30 group">
                         <TableCell className="font-medium text-emerald-600 dark:text-emerald-500">
-                          {txn.invoiceNumber}
+                          {txn.invoice_number}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span>{new Date(txn.timestamp).toLocaleDateString()}</span>
+                            <span>{new Date(txn.createdAt).toLocaleDateString()}</span>
                             <span className="text-xs text-muted-foreground">
-                              {new Date(txn.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              {new Date(txn.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
                         </TableCell>
                         <TableCell className="text-center">{txn.items.length}</TableCell>
                         <TableCell className="text-right font-bold tracking-tight">
-                          ₹{txn.totalAmount.toLocaleString("en-IN")}
+                          ₹{txn.total_amount.toLocaleString("en-IN")}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-foreground"
                             onClick={() => openInvoice(txn)}
                           >
@@ -132,28 +133,28 @@ export default function InvoicesPage() {
 
               {/* Mobile Card List */}
               <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3 bg-muted/20">
-                {filteredInvoices.map((txn) => (
-                  <div 
-                    key={txn.id} 
+                {filteredInvoices.map((txn: Transaction) => (
+                  <div
+                    key={txn._id}
                     className="bg-card p-4 rounded-xl shadow-sm border flex flex-col gap-3 active:scale-95 transition-transform"
                     onClick={() => openInvoice(txn)}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-emerald-600 dark:text-emerald-500">
-                        {txn.invoiceNumber}
+                        {txn.invoice_number}
                       </span>
                       <span className="text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded">
-                        {new Date(txn.timestamp).toLocaleDateString()}
+                        {new Date(txn.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-end justify-between">
                       <div className="text-xs text-muted-foreground space-y-0.5">
                         <p>{txn.items.length} items purchased</p>
-                        <p>{new Date(txn.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p>{new Date(txn.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                       </div>
                       <span className="font-bold text-lg tabular-nums">
-                        ₹{txn.totalAmount.toLocaleString("en-IN")}
+                        ₹{txn.total_amount.toLocaleString("en-IN")}
                       </span>
                     </div>
                   </div>
@@ -165,7 +166,7 @@ export default function InvoicesPage() {
 
       </main>
 
-      <InvoiceDialog 
+      <InvoiceDialog
         transaction={selectedTxn}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
