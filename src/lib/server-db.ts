@@ -16,7 +16,7 @@ export const checkStock = async (itemName: string) => {
   // We use MongoDB $regex to do a case-insensitive search 
   // exactly like your old .includes() logic!
   return await Product.find({
-    shopId: SHOP_ID,
+    shop_id: SHOP_ID,
     $or: [
       { name: { $regex: itemName, $options: "i" } },
       // If you added 'shortName' to your Mongoose schema, uncomment the line below:
@@ -30,7 +30,7 @@ export const getLowStock = async (threshold: number) => {
 
   // $lte means "Less Than or Equal To" in MongoDB
   return await Product.find({
-    shopId: SHOP_ID,
+    shop_id: SHOP_ID,
     stock: { $lte: threshold }
   });
 };
@@ -40,7 +40,7 @@ export const listCategoryItems = async (categoryName: string) => {
 
   // 1. Find the category ignoring uppercase/lowercase
   const cat = await Category.findOne({
-    shopId: SHOP_ID,
+    shop_id: SHOP_ID,
     label: { $regex: new RegExp(`^${categoryName}$`, "i") }
   });
 
@@ -48,7 +48,7 @@ export const listCategoryItems = async (categoryName: string) => {
 
   // 2. Find all products that belong to this category's label
   return await Product.find({
-    shopId: SHOP_ID,
+    shop_id: SHOP_ID,
     category: cat.label
   });
 };
@@ -62,7 +62,7 @@ export const getTodaySales = async () => {
 
   // 2. Ask MongoDB for all transactions from midnight until right now
   const todaysTxns = await Transaction.find({
-    shopId: SHOP_ID,
+    shop_id: SHOP_ID,
     createdAt: { $gte: startOfToday } // $gte means "Greater Than or Equal To"
   });
 
