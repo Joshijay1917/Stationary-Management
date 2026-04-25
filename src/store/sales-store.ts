@@ -12,11 +12,9 @@ type TransactionState = {
   transactions: Transaction[];
   isLoading: boolean;
 
-  // Actions
   fetchTransactions: () => Promise<void>;
   addTransaction: (transaction: Partial<Transaction>) => Promise<void>;
 
-  // 🚀 The Magic: Derived Helper Function right in the store!
   getTodayMetrics: () => DashboardMetrics;
 };
 
@@ -72,16 +70,20 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
   getTodayMetrics: () => {
     const transactions = get().transactions;
     const today = new Date().toDateString();
+    console.log("Today:", today)
 
     // 1. Filter for only today's sales
     const todaysTxns = transactions.filter(
       (t) => new Date(t.createdAt).toDateString() === today
     );
 
+    console.log("Transactions:", todaysTxns)
     // 2. Crunch the numbers
     const revenue = todaysTxns.reduce((sum, t) => sum + t.total_amount, 0);
     const profit = todaysTxns.reduce((sum, t) => sum + t.total_profit, 0);
     const count = todaysTxns.length;
+
+    console.log("Metrics:", { revenue, profit, count })
 
     return { revenue, profit, count };
   }
