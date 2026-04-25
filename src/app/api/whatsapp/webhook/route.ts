@@ -4,7 +4,8 @@ import { checkStock, getLowStock, listCategoryItems, getTodaySales } from "@/lib
 import { SYS_PROMPT } from "@/lib/system_prompt";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const OWNER_PHONES = (process.env.OWNER_PHONE_NUMBERS || "")
+console.log("OWNERPhones:", process.env.OWNER_PHONE_NUMBER);
+const OWNER_PHONES = (process.env.OWNER_PHONE_NUMBER || "")
   .split(",")
   .map(num => num.trim())
   .filter(num => num.length > 0);
@@ -81,6 +82,8 @@ export async function POST(req: Request) {
 
     // Security Whitelist Filter (Only allow the boss!)
     if (!sender) return NextResponse.json({ success: true, reason: "No sender info" });
+
+    console.log("Owners_phones:", OWNER_PHONES);
 
     const isAuthorized = OWNER_PHONES.some((num) => sender.includes(num.trim()));
 
