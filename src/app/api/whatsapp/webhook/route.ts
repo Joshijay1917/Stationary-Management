@@ -4,7 +4,10 @@ import { checkStock, getLowStock, listCategoryItems, getTodaySales } from "@/lib
 import { SYS_PROMPT } from "@/lib/system_prompt";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const OWNER_PHONE = (process.env.OWNER_PHONE_NUMBERS || "").split(",");
+const OWNER_PHONES = (process.env.OWNER_PHONE_NUMBERS || "")
+  .split(",")
+  .map(num => num.trim())
+  .filter(num => num.length > 0);
 const WAHA_API_URL = process.env.WAHA_API_URL || "http://localhost:3001";
 const chatMemoryHistory = new Map();
 
@@ -79,10 +82,10 @@ export async function POST(req: Request) {
     // Security Whitelist Filter (Only allow the boss!)
     if (!sender) return NextResponse.json({ success: true, reason: "No sender info" });
 
-    const isAuthorized = OWNER_PHONE.some((num) => sender.includes(num.trim()));
+    const isAuthorized = OWNER_PHONES.some((num) => sender.includes(num.trim()));
 
     // Ignore internal broadcast or groups / other messages
-    if (OWNER_PHONE && !isAuthorized) {
+    if (OWNER_PHONES && !isAuthorized) {
       console.log(`[Blocked] Unauthorized sender: ${sender}`);
       return NextResponse.json({ success: true, reason: "Unauthorized" });
     }
