@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         // Create the receipt and lock it to this specific shop
         const newTransaction = await Transaction.create({
             ...body,
-            shopId: 'shop_001'
+            shop_id: 'shop_001'
         });
 
         return NextResponse.json(newTransaction, { status: 201 });
