@@ -21,7 +21,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         await connectToDatabase();
-        const body = await request.json();
+        const { _id, ...body } = await request.json();
 
         // Create the receipt and lock it to this specific shop
         const newTransaction = await Transaction.create({
