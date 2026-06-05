@@ -30,18 +30,7 @@ export async function POST(request: Request) {
             shop_id: 'shop_001'
         });
 
-        console.log('New Product Created:', newProduct);
-
-        const productResponse = newProduct.toObject();
-        console.log('Product Response Object:', productResponse);
-
-        if (productResponse._id) {
-            productResponse._id = productResponse._id.toString();
-        }
-
-        console.log('Final Product Response:', productResponse);
-
-        return NextResponse.json(productResponse, { status: 201 });
+        return NextResponse.json(newProduct, { status: 201 });
     } catch (error) {
         console.error('POST Product Error:', error);
         return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
