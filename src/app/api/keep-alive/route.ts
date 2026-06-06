@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
 
-export default async function GET(req: Request) {
+export async function GET(req: Request) {
   const RENDER_URL = 'https://my-waha-api-wv3j.onrender.com/health';
   const API_KEY = process.env.WAHA_API_KEY;
 
   if (!API_KEY) {
-    return NextResponse.json({ error: 'Unauthorized request footprint.' });
+    return NextResponse.json({ error: 'Unauthorized request footprint.' }, { status: 401 });
   }
 
   try {
     const response = await fetch(RENDER_URL, {
-        headers: {
+      method: 'GET',
+      headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'x-api-key': API_KEY,
@@ -21,6 +22,6 @@ export default async function GET(req: Request) {
     }
     throw new Error(`Backend responded with status: ${response.status}`);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
