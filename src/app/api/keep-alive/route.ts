@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
-  const RENDER_URL = 'https://my-waha-api-wv3j.onrender.com/health';
+  const RENDER_URL = 'https://my-waha-api-wv3j.onrender.com/api/version';
   const API_KEY = process.env.WAHA_API_KEY;
 
   if (!API_KEY) {
